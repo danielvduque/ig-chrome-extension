@@ -1,0 +1,18 @@
+{
+    "name": "IG img",
+    "description": "Instagram Image Downloader",
+    "version": "1.0",
+    "manifest_version": 3,
+    "permissions": ["activeTab", "scripting", "storage", "declarativeContent"],
+    "action": {
+      "default_popup": "index.html",
+      "default_icon": "hello_extensions.png"
+    },
+    "content_scripts": [
+      {
+        "matches" : ["https://www.instagram.com/*"],
+        "css": ["styles.css"],
+        "js": ["downloadImage.js"]
+      }
+    ]
+  }
