@@ -1,7 +1,22 @@
 {
   "manifest_version": 3,
-  "name": "InstaDownloader",
-  "version": "1.0",
+  "name": "InstaDownloader Pro",
+  "version": "1.1",
+  "icons": {
+    "16": "icons/icon.png",
+    "32": "icons/icon.png",
+    "48": "icons/icon.png",
+    "64": "icons/icon.png",
+    "128": "icons/icon.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon.png",
+      "32": "icons/icon.png"
+    },
+    "default_title": "InstaDownloader Pro",
+    "default_popup": "popup.html"
+  },
   "permissions": ["contextMenus", "downloads"],
   "host_permissions": ["*://*.instagram.com/*"],
   "background": {
@@ -12,8 +27,5 @@
       "matches": ["*://*.instagram.com/*"],
       "js": ["content.js"]
     }
-  ],
-  "action": {
-    "default_popup": "popup.html"
-  }
+  ]
 }
