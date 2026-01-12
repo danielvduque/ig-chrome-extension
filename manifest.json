@@ -1,18 +1,19 @@
 {
-    "name": "IG img",
-    "description": "Instagram Image Downloader",
-    "version": "1.0",
-    "manifest_version": 3,
-    "permissions": ["activeTab", "scripting", "storage", "declarativeContent"],
-    "action": {
-      "default_popup": "index.html",
-      "default_icon": "hello_extensions.png"
-    },
-    "content_scripts": [
-      {
-        "matches" : ["https://www.instagram.com/*"],
-        "css": ["styles.css"],
-        "js": ["downloadImage.js"]
-      }
-    ]
+  "manifest_version": 3,
+  "name": "InstaDownloader",
+  "version": "1.0",
+  "permissions": ["contextMenus", "downloads"],
+  "host_permissions": ["*://*.instagram.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.instagram.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
   }
+}
