@@ -1,36 +1,49 @@
-console.log("InstaDownloader: Script inyectado con éxito.");
-
 let lastElement = null;
-
-// Capturamos el elemento justo al hacer clic derecho
-document.addEventListener("contextmenu", (e) => {
-  lastElement = e.target;
-}, true);
+document.addEventListener("contextmenu", (e) => { lastElement = e.target; }, true);
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "get_url") {
-    // Buscamos la imagen con un selector más agresivo
-    // 1. Si es una imagen directa
-    // 2. Si es el contenedor que tiene una imagen dentro
-    // 3. Si es la capa transparente de Instagram, buscamos hacia atrás (sibling)
-    let img = lastElement.tagName === 'IMG' ? lastElement : null;
+    let foundUrl = null;
+    let ext = "jpg";
+    let user = "usuario";
 
-    if (!img) {
-      // Instagram suele poner la imagen como un hermano anterior del div transparente
-      const parent = lastElement.closest('div');
-      img = parent?.querySelector('img') || parent?.previousElementSibling?.querySelector('img');
-    }
+    const container = lastElement?.closest('article') || lastElement?.closest('div[role="dialog"]') || lastElement?.closest('section');
 
-    // Intentar obtener el nombre de usuario
-    const article = lastElement.closest('article');
-    const user = article?.querySelector('header a')?.innerText?.split('\n')[0].trim() || "usuario";
+    // Intentar obtener el usuario
+    const userTag = container?.querySelector('header a, h2 a');
+    if (userTag) user = userTag.innerText.split('\n')[0].trim();
 
-    if (img && img.src) {
-      sendResponse({ url: img.src, user: user });
+    // BUSCADOR DE VIDEO (Bypass de Blob)
+    const video = container?.querySelector('video');
+    if (video) {
+      ext = "mp4";
+      // 1. Intentar sacar la URL de los metadatos de la página
+      const scripts = document.querySelectorAll('script');
+      for (let script of scripts) {
+        if (script.innerText.includes('video_url')) {
+          // Buscamos una URL que termine en .mp4 dentro del texto del script
+          const match = script.innerText.match(/"video_url":"([^"]+)"/);
+          if (match && match[1]) {
+            foundUrl = match[1].replace(/\\u0026/g, '&');
+            break;
+          }
+        }
+      }
+
+      // 2. Si falla, buscar el poster o la versión de previsualización que a veces es el MP4 real
+      if (!foundUrl || foundUrl.startsWith('blob')) {
+        foundUrl = video.getAttribute('src') || video.src;
+      }
     } else {
-      console.log("No se detectó imagen en este elemento:", lastElement);
-      sendResponse({ url: null });
+      // BUSCADOR DE IMAGEN
+      const img = container?.querySelector('img');
+      if (img) {
+        foundUrl = img.src;
+        ext = "jpg";
+      }
     }
+
+    sendResponse({ url: foundUrl, user: user, ext: ext });
   }
-  return true; // CRÍTICO: Mantiene el puerto abierto para respuestas asíncronas
+  return true;
 });
